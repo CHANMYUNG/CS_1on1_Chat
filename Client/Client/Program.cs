@@ -10,12 +10,12 @@ namespace Client
 {
     class Client
     {
-
+        
         static void Main(string[] args)
         {
+
+
             Socket client = null;
-
-
             IPEndPoint ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080);
             client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -30,18 +30,37 @@ namespace Client
 
 
             byte[] message = Encoding.ASCII.GetBytes(s);
-            try
-            {
-                while (true)
-                {
-                    client.Send(message);
-                    Thread.Sleep(500); // 안쓰면 오류
-                    client.Send(Encoding.ASCII.GetBytes("!@!"));
-                    Console.WriteLine("Sending Succeed");
-                }
 
+       
+
+            Thread receivingThread = new Thread(() =>SocketReceive(client));
+            receivingThread.Start();
+
+            Thread sendingThread = new Thread(() => SocketSend(client));
+            sendingThread.Start();
+         }
+
+        public static void SocketReceive(Socket client)
+        {
+            byte[] Buffer = new byte[1024];
+            while (true)
+            {
+                int byteRec = client.Receive(Buffer);
+                Console.WriteLine(Encoding.ASCII.GetString(Buffer, 0, byteRec));
+                Thread.Sleep(500);
             }
-            catch (Exception e) { Console.WriteLine(e.Message); }
+        }
+        public static void SocketSend(Socket client)
+        {
+            string s = "Hello Server";
+            byte[] message = new byte[1024];
+            message = Encoding.ASCII.GetBytes(s);
+            while (true)
+            {
+
+                client.Send(message);
+                Thread.Sleep(500);
+            }
         }
     }
 }

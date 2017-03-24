@@ -5,15 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 namespace ConsoleApp1
 {
     class Server
     {
-
+        
         static void Main(string[] args)
         {
             byte[] sentMessage = new byte[1024];
-
+            Socket client = null;
 
             IPEndPoint ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080);
             Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -23,15 +24,13 @@ namespace ConsoleApp1
 
                 server.Listen(5);
 
-                Socket client = server.Accept();
+                client = server.Accept();
 
-                while (true)
-                {
-                    int byteRec = client.Receive(sentMessage);
-                    Console.WriteLine(Encoding.ASCII.GetString(sentMessage, 0, byteRec));
-                    byteRec = client.Receive(sentMessage);
-                    Console.WriteLine(Encoding.ASCII.GetString(sentMessage, 0, byteRec));
-                }
+                Thread receivingThread = new Thread(() => SocketReceive(client));
+                receivingThread.Start();
+
+                Thread sendingThread = new Thread(() => SocketSend(client));
+                sendingThread.Start();
             }
             catch (Exception e)
             {
@@ -39,6 +38,26 @@ namespace ConsoleApp1
             }
 
 
+        }
+        public static void SocketReceive(Socket client)
+        {
+            byte[] Buffer = new byte[1024];
+            while (true) {
+                int byteRec = client.Receive(Buffer);
+                Console.WriteLine(Encoding.ASCII.GetString(Buffer, 0, byteRec));
+                Thread.Sleep(500);
+            }
+        }
+        public static void SocketSend(Socket client)
+        {
+            string s = "Hello Client";
+            byte[] message = new byte[1024];
+            message = Encoding.ASCII.GetBytes(s);
+            while (true)
+            {
+                client.Send(message);
+                Thread.Sleep(500);
+            }
         }
     }
 }
