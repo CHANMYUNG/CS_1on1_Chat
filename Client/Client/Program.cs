@@ -14,7 +14,7 @@ namespace Client
         static void Main(string[] args)
         {
 
-
+            
             Socket client = null;
             IPEndPoint ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080);
             client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -24,7 +24,7 @@ namespace Client
                 client.Connect(ipep);
                 Console.WriteLine(client.Connected);
             }
-            catch (Exception e) { Console.WriteLine("Connecting failed"); }
+            catch (Exception e) { Console.WriteLine(e.Message); return; }
 
             string s = "hey bro!";
 
@@ -46,7 +46,7 @@ namespace Client
             while (true)
             {
                 int byteRec = client.Receive(Buffer);
-                Console.WriteLine(Encoding.ASCII.GetString(Buffer, 0, byteRec));
+                Console.WriteLine(Encoding.Default.GetString(Buffer, 0, byteRec));
                 Thread.Sleep(500);
             }
         }
@@ -57,7 +57,7 @@ namespace Client
             message = Encoding.ASCII.GetBytes(s);
             while (true)
             {
-
+                Console.WriteLine(s);
                 client.Send(message);
                 Thread.Sleep(500);
             }

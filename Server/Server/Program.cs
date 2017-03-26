@@ -44,7 +44,7 @@ namespace ConsoleApp1
             byte[] Buffer = new byte[1024];
             while (true) {
                 int byteRec = client.Receive(Buffer);
-                Console.WriteLine(Encoding.ASCII.GetString(Buffer, 0, byteRec));
+                Console.WriteLine(Encoding.Default.GetString(Buffer, 0, byteRec));
                 Thread.Sleep(500);
             }
         }
