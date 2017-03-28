@@ -66,6 +66,11 @@ namespace _1on1Server
         {
             byte[] bytes = new byte[1024];
             workingSocket = socket.Accept();
+            Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+             {
+                 textField.AppendText("System : Connecting Succeed...\n");
+             }));
+            
 
             while (true)
             {
@@ -74,7 +79,7 @@ namespace _1on1Server
                     workingSocket.Receive(bytes, bytes.Length, SocketFlags.None);
                 }
                 catch (NullReferenceException ne) { MessageBox.Show("NullReference"); }
-                catch (SocketException se) {MessageBox.Show("Socket Error Occured"); }
+                catch (SocketException se) {MessageBox.Show("Socket Error Occured"); return; }
                 catch (Exception ex) { MessageBox.Show(ex.ToString()); }
                 string message = Encoding.Default.GetString(bytes);
                 message = message.TrimEnd('\0');
@@ -94,17 +99,26 @@ namespace _1on1Server
 
         private void sendMsg()
         {
-            if (inputField.Text.Equals("")) return;
-                textField.AppendText(inputField.Text.Trim() + "\n");
+            string message = inputField.Text;
+            if (message.Equals("")) return;
+            message = "Server : " + message;
+            textField.AppendText(message.Trim() + "\n");
             textField.ScrollToEnd();
             try
             {
-                workingSocket.Send(Encoding.Default.GetBytes(inputField.Text));
+                workingSocket.Send(Encoding.Default.GetBytes(message));
             }catch(Exception e)
             {
                 MessageBox.Show("sending failed");
             }
             inputField.Text = "";
+        }
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                sendMsg();
+            }
         }
     }
 }
