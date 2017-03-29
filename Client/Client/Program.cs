@@ -16,7 +16,7 @@ namespace Client
 
             
             Socket client = null;
-            IPEndPoint ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080);
+            IPEndPoint ipep = new IPEndPoint(IPAddress.Parse("192.168.31.248"), 8080);
             client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             try

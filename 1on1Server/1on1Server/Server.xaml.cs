@@ -16,7 +16,6 @@ using System.Collections;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Collections;
 using System.Windows.Threading;
 
 namespace _1on1Server
@@ -33,10 +32,9 @@ namespace _1on1Server
         private Socket socket = null;
         private Socket workingSocket = null;
         private Thread receivingThread = null;
-        private Thread sendingThread = null;
         private List<string> ipList = new List<string>();
         private IPEndPoint ipep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080);
-       
+        private bool shiftPressed = false;
         public Server(Grid root)
         {
             InitializeComponent();
@@ -64,7 +62,7 @@ namespace _1on1Server
         }
         private void receiving()
         {
-            byte[] bytes = new byte[1024];
+            byte[] bytes = null;
             workingSocket = socket.Accept();
             Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
              {
@@ -74,13 +72,14 @@ namespace _1on1Server
 
             while (true)
             {
+                bytes = new byte[1024];
                 try
                 {
                     workingSocket.Receive(bytes, bytes.Length, SocketFlags.None);
                 }
-                catch (NullReferenceException ne) { MessageBox.Show("NullReference"); }
-                catch (SocketException se) {MessageBox.Show("Socket Error Occured"); return; }
-                catch (Exception ex) { MessageBox.Show(ex.ToString()); }
+                catch (NullReferenceException ne) { MessageBox.Show("NullReference"); workingSocket.Close(); socket.Close(); return; }
+                catch (SocketException se) {MessageBox.Show("Socket Error Occured"); workingSocket.Close(); socket.Close(); return; }
+                catch (Exception ex) { MessageBox.Show(ex.ToString()); workingSocket.Close(); socket.Close(); return; }
                 string message = Encoding.Default.GetString(bytes);
                 message = message.TrimEnd('\0');
 
@@ -89,7 +88,7 @@ namespace _1on1Server
                     textField.AppendText(message + "\n");
                     textField.ScrollToEnd();
                 }));
-                
+                bytes = null;
             }
         }
         private void sendButton_Click(object sender, RoutedEventArgs e)
@@ -115,9 +114,27 @@ namespace _1on1Server
         }
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
+            if(e.Key == Key.LeftShift || e.Key == Key.RightShift)
+            {
+                shiftPressed = true;
+            }
             if (e.Key == Key.Return)
             {
-                sendMsg();
+                if (shiftPressed == true)
+                {
+                    inputField.AppendText(Environment.NewLine);
+                    inputField.SelectionStart = inputField.Text.Length;
+                }
+                else
+                    sendMsg();
+            }
+            
+        }
+        private void OnKeyUp(object sender, KeyEventArgs e)
+        {
+            if(e.Key== Key.LeftShift || e.Key == Key.RightShift)
+            {
+                shiftPressed = false;
             }
         }
     }
