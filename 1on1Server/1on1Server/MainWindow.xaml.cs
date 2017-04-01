@@ -22,7 +22,7 @@ namespace _1on1Server
     /// </summary>
     public partial class MainWindow : Window
     {
-        Server server;
+        
         
         public MainWindow()
         {
@@ -35,6 +35,7 @@ namespace _1on1Server
             {
                 Environment.Exit(1);
             };
+            
             
         }
         
